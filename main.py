@@ -20,7 +20,6 @@ e = 1
 
 # Digital Hair Filtering
 
-
 # Image Read, Threshold and Save
 for filename in os.listdir(melanoma):
 	if filename.endswith(".jpg"):

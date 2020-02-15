@@ -39,9 +39,9 @@ cv2.putText(inpaint, 'skin_lesion', (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (
 # cv2.imshow('blur', blur)
 # cv2.imshow('frame',img)
 # cv2.imshow('thresh',thresh
-savepath = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\thresh\melanoma'
-filename = "hair_removal.jpg"
-cv2.imwrite(os.path.join(savepath, filename), thresh)
+# savepath = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\thresh\melanoma'
+# filename = "hair_removal.jpg"
+# cv2.imwrite(os.path.join(savepath, filename), thresh)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
