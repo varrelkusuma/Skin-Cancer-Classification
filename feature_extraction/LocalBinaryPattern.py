@@ -7,6 +7,7 @@ class LocalBinaryPatterns:
 	def __init__(self, numPoints, radius):
 		self.numPoints = numPoints
 		self.radius = radius
+		print("Initializing Local Binary Pattern...")
         
 	def describe(self, image, eps=1e-7):
 		# compute the Local Binary Pattern representation
