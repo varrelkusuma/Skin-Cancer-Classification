@@ -16,36 +16,117 @@ from skimage import io, color, img_as_ubyte, img_as_float
 #costum imports
 from feature_extraction.GrayLevelCooccurenceMatrix import GrayLevelCooccurenceMatrix
 from feature_extraction.LocalBinaryPattern import LocalBinaryPatterns
-from preprocessing.Segmentation import Segmentation
+from feature_extraction.ColorExtraction import ColorExtraction
+from preprocessing.ImageProcess import ImageProcess
 from preprocessing.ObjectRemoval import ObjectRemoval
+from preprocessing.Segmentation import Segmentation
 
-melanoma = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\melanoma'
-bcc = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\bcc'
-scc = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\scc'
-count = 1
+# Raw Picture Folder
+melanoma = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\raw\melanoma'
+bcc = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\raw\bcc'
+scc = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\raw\scc'
+
+# Resize Picture Folder
+mel_resize = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\resize\melanoma'
+bcc_resize = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\resize\bcc'
+scc_resize = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\resize\scc'
 
 # Threshold Picture Folder
 mel_thresh = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\thresh\melanoma'
 bcc_thresh = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\thresh\bcc'
 scc_thresh = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\thresh\scc'
 
+# Other variable
+count = 1
+alpha = 1.4
+beta = 10
+
+"""
+==========================================================================================
+Image Process Initialization
+This method is special for melanoma case because the raw image pixel are around 2000x1000
+The other (BCC & SCC) doesn't need resize and could be used as it is
+==========================================================================================
+1. Image resize (60% size)
+2. Image cropped to be close to the bounding box
+
+"""
+"""
+# Create Object
+ip = ImageProcess()
+obr = ObjectRemoval()
+sg = Segmentation()
+
+print("Resize & Cropping Melanoma Picture...")
+for filename in os.listdir(melanoma):
+	if filename.endswith(".jpg"):
+
+		# Resize & Crop Image
+		tempfilename = melanoma+"/"+filename
+		image = cv2.imread(tempfilename)
+		resize = ip.resize(image, 60)
+		color_correction = ip.manualColorCorrection(resize, alpha, beta)
+		cropped = sg.cropRect(color_correction)
+
+		if cropped.size < 1:
+			count = count + 1
+		else:
+			filename = "file_%d.jpg"%count
+			obr.save(cropped, mel_resize, filename)
+			count = count + 1
+
+count = 1
+print("Cropping BCC Picture...")
+for filename in os.listdir(bcc):
+	if filename.endswith(".jpg"):
+
+		#Crop Image
+		tempfilename = bcc+"/"+filename
+		image = cv2.imread(tempfilename)
+		color_correction = ip.manualColorCorrection(image, alpha, beta)
+		cropped = sg.cropRect(color_correction)
+
+		if cropped.size < 1:
+			count = count + 1
+		else:
+			filename = "file_%d.jpg"%count
+			obr.save(cropped, bcc_resize, filename)
+			count = count + 1
+
+count = 1
+print("Cropping SCC Picture...")
+for filename in os.listdir(scc):
+	if filename.endswith(".jpg"):
+
+		#Crop Image
+		tempfilename = scc+"/"+filename
+		image = cv2.imread(tempfilename)
+		color_correction = ip.manualColorCorrection(image, alpha, beta)
+		cropped = sg.cropRect(color_correction)
+
+		if cropped.size < 1:
+			count = count + 1
+		else:
+			filename = "file_%d.jpg"%count
+			obr.save(cropped, scc_resize, filename)
+			count = count + 1
+"""
 
 """
 ==========================================================================================
 Object Removal Method (Output: Thresholded Image)
 ==========================================================================================
 1. Hair Removal
-2. Microscope Removal
+2. Image Smoothing
+3. Image Threshold
 
 """
 """
-# Create Object
-obr = ObjectRemoval()
-
+count = 1
 print("Melanoma object removal...")
-for filename in os.listdir(melanoma):
+for filename in os.listdir(mel_resize):
 	if filename.endswith(".jpg"):
-		tempfilename = melanoma+"/"+filename
+		tempfilename = mel_resize+"/"+filename
 
 		# Hair Removal
 		img = cv2.imread(tempfilename)
@@ -59,9 +140,9 @@ for filename in os.listdir(melanoma):
 
 count = 1
 print("BCC object removal...")
-for filename in os.listdir(bcc):
+for filename in os.listdir(bcc_resize):
 	if filename.endswith(".jpg"):
-		tempfilename = bcc+"/"+filename
+		tempfilename = bcc_resize+"/"+filename
 
 		#Hair Removal
 		img = cv2.imread(tempfilename)
@@ -75,9 +156,9 @@ for filename in os.listdir(bcc):
 
 count = 1
 print("SCC object removal...")
-for filename in os.listdir(scc):
+for filename in os.listdir(scc_resize):
 	if filename.endswith(".jpg"):
-		tempfilename = scc+"/"+filename
+		tempfilename = scc_resize+"/"+filename
 
 		#Hair Removal
 		img = cv2.imread(tempfilename)
@@ -88,8 +169,8 @@ for filename in os.listdir(scc):
 		filename = "file_%d.jpg"%count
 		obr.save(thresh, scc_thresh, filename)
 		count = count + 1
-
 """
+
 """
 ==========================================================================================
 
@@ -99,8 +180,8 @@ Feature Extraction for Thresholded Image
 2. Local Binary Pattern
 
 ==========================================================================================
-
-
+"""
+"""
 ==========================================================================================
 
 Gray-Level Cooccurence Matrix (GLCM) Implementation
@@ -188,7 +269,6 @@ Steps done in the process:
 4. Create supervector for all the data
 
 ==========================================================================================
-
 """
 
 # Create Object & Variable
@@ -235,14 +315,64 @@ mel_lbp_df = pd.DataFrame(np.concatenate(mel_data))
 bcc_lbp_df = pd.DataFrame(np.concatenate(bcc_data))
 scc_lbp_df = pd.DataFrame(np.concatenate(scc_data))
 
+"""
+==========================================================================================
+
+Color Feature Extraction
+
+Steps done in the process:
+1. Create empty array for the data
+2. Take global stdev and mean from cropped data (not threshold)
+3. Use this data as a global color variable
+
+==========================================================================================
+"""
+
+# Create Variable
+ce = ColorExtraction()
+mel_color = []
+bcc_color = []
+scc_color = []
+
+print("Extracting Color Variables from Melanoma...")
+for filename in os.listdir(mel_resize):
+	if filename.endswith(".jpg"):
+		tempfilename = mel_resize+"/"+filename
+		img = cv2.imread(tempfilename)
+		color = ce.color_extraction(img)
+		color_reshaped = np.reshape(color, (1, 6))
+		mel_color.append(color_reshaped)
+
+print("Extracting Color Variables from BCC...")
+for filename in os.listdir(bcc_resize):
+	if filename.endswith(".jpg"):
+		tempfilename = bcc_resize+"/"+filename
+		img = cv2.imread(tempfilename)
+		color = ce.color_extraction(img)
+		color_reshaped = np.reshape(color, (1, 6))
+		bcc_color.append(color_reshaped)
+
+print("Extracting Color Variables from SCC...")
+for filename in os.listdir(scc_resize):
+	if filename.endswith(".jpg"):
+		tempfilename = scc_resize+"/"+filename
+		img = cv2.imread(tempfilename)
+		color = ce.color_extraction(img)
+		color_reshaped = np.reshape(color, (1, 6))
+		scc_color.append(color_reshaped)
+
+mel_color_df = pd.DataFrame(np.concatenate(mel_color))
+bcc_color_df = pd.DataFrame(np.concatenate(bcc_color))
+scc_color_df = pd.DataFrame(np.concatenate(scc_color))
+
 
 """
 ==========================================================================================
 
 Exporting all the defined data (GLCM, LBP, Color) to a single matrix
 The order of the supervector is as defined
-1. (8 column) Color
-2. (X column) LBP
+1. (6 column) Color
+2. (26 column) LBP
 3. (24 column) GLCM
 
 ==========================================================================================
@@ -251,16 +381,18 @@ The order of the supervector is as defined
 # Exporting as csv file
 glcm_out = pd.concat([mel_result, bcc_result, scc_result])
 lbp_out = pd.concat([mel_lbp_df, bcc_lbp_df, scc_lbp_df])
+color_out = pd.concat([mel_color_df, bcc_color_df, scc_color_df])
 # glcm_out.drop(glcm_out.columns[0], axis=1)
 
 glcm_out.reset_index(drop=True, inplace=True)
 lbp_out.reset_index(drop=True, inplace=True)
-out = pd.concat([lbp_out, glcm_out], axis = 1)
+color_out.reset_index(drop=True, inplace=True)
+out = pd.concat([color_out, lbp_out, glcm_out], axis = 1)
 
 glcm_out.to_csv('glcm.csv', index=False, header=None)
 lbp_out.to_csv('lbp.csv', index=False, header=None)
+color_out.to_csv('color.csv', index=False, header=None)
 out.to_csv('data.csv', index=False, header=None)
-
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
