@@ -21,7 +21,7 @@ from preprocessing.ObjectRemoval import ObjectRemoval
 sg = Segmentation()
 
 # Defining ROI
-melanoma = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\melanoma\ISIC_0000139.jpg'
+melanoma = r'C:\Users\ravee\Jupyter\Skin-Cancer-Classification\images\melanoma\ISIC_0009992.jpg'
 image = cv2.imread(melanoma)
 roi = sg.defineROI(image)
 cv2.imshow("ROI", roi)

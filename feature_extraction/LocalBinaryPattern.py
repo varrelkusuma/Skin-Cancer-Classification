@@ -23,3 +23,13 @@ class LocalBinaryPatterns:
 		hist /= (hist.sum() + eps)
 		# return the histogram of Local Binary Patterns
 		return hist
+
+	def represent(self, image, eps=1e-7):
+		# compute the Local Binary Pattern representation
+		# of the image, and then use the LBP representation
+		# to build the histogram of patterns
+		lbp = feature.local_binary_pattern(image, self.numPoints,
+			self.radius, method="uniform")
+
+		# return the histogram of Local Binary Patterns
+		return lbp

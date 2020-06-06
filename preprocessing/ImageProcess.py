@@ -62,3 +62,8 @@ class ImageProcess:
         manual_result = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
 
         return manual_result
+
+    def color_mask(self, image, image_mask):
+        masked = cv2.bitwise_and(image, image_mask)
+
+        return masked
